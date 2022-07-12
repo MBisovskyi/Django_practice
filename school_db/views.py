@@ -1,3 +1,4 @@
+from itertools import count
 from django.shortcuts import render
 from django.db.models import Count
 from django.core.exceptions import ObjectDoesNotExist
@@ -13,7 +14,6 @@ from .const_data import view_information
 def example_solution(request):
 
     students = Student.objects.all()
-
     for student in students:
         print(f'First Name: {student.first_name} Last Name: {student.last_name} GPA: {student.gpa}')
 
@@ -59,7 +59,9 @@ SELECT `school_db_student`.`id`,
 # Print out each student's full name and gpa to the terminal
 def problem_one(request):
 
-
+    students = Student.objects.filter(gpa__gt=3.0).order_by('-gpa')
+    for student in students:
+      print(f'Full Name: {student.first_name} {student.last_name} GPA: {student.gpa}')
 
     return complete(request)
 
@@ -100,7 +102,9 @@ SELECT `school_db_student`.`id`,
 # Print out the instructor's full name and hire date to the terminal
 def problem_two(request):
 
-
+    instructors = Instructor.objects.filter(hire_date__year__lt=2010)
+    for instructor in instructors:
+      print(f'Full Name: {instructor.first_name} {instructor.last_name}\nHire Date: {instructor.hire_date}\n')
 
     return complete(request)
 
@@ -140,7 +144,11 @@ SELECT `school_db_instructor`.`id`,
 # (Do not hard code his name in the print)
 def problem_three(request):
 
-
+    instructor = Instructor.objects.get(id=2)
+    print(f'\nInstructor Name: {instructor.first_name} {instructor.last_name}\nCourses:')
+    courses = Course.objects.filter(instructor_id=2)
+    for course in courses:
+      print(f'    - {course.name}')
 
     return complete(request)
 
@@ -188,7 +196,10 @@ SELECT `school_db_instructor`.`id`,
 # Get the count of students, courses, and instructors and print them in the terminal
 def problem_four(request):
 
-
+    students_count = Student.objects.all().count()
+    courses_count = Course.objects.all().count()
+    instructors_count = Instructor.objects.all().count()
+    print(f'\nStudents Count: {students_count}\nCourses Count: {courses_count}\nInstructors Count: {instructors_count}\n')
 
     return complete(request)
 
@@ -234,7 +245,8 @@ SELECT COUNT(*) AS `__count`
 # NOTE every time you execute this function a duplicate student will be created with a different primary key number
 def problem_five(request):
 
-
+    student = Student.objects.get(first_name = 'Mykola')
+    print(f'Id: {student.id}\nFull Name: {student.first_name} {student.last_name}\nYear: 20{student.year}\nGPA: {student.gpa}')
 
     return complete(request)
 
@@ -264,12 +276,14 @@ VALUES ('Kyle', 'Harwood', 2022, 3.0)
 
 
 # Query the previoiusly created student by the id and update the "gpa" to a new value
-# Then query the studets table to get that student by their id
+# Then query the students table to get that student by their id
 # Print the new student's id, full name, and gpa to the terminal
 def problem_six(request):
     
     # Make sure to set this equal to the primary key of the row you just created!
-    student_id = 11
+    student = Student.objects.filter(pk=11).update(gpa=3.5)
+    student = Student.objects.get(id=11)
+    print(f'Id: {student.id}\nFull Name: {student.first_name} {student.last_name}\nGPA: {student.gpa}')
 
 
 
@@ -317,12 +331,9 @@ LIMIT 21
 # Check your MySQL Workbench to confirm the student is no longer in the table!
 def problem_seven(request):
 
-    # Make sure to set this equal to the primary key of the row you just created!
-    student_id = 11
-
-
+    Student.objects.filter(pk=11).delete()
     try:
-        student = Student.objects.get(pk=student_id)
+        student = Student.objects.get(pk=11)
     except ObjectDoesNotExist:
         print('Great! It failed and couldnt find the object because we deleted it!')
 
@@ -377,9 +388,7 @@ SELECT `school_db_student`.`id`,
 # Print out the instructors full name and number of courses to the console
 def bonus_problem(request):
 
-
-
-    return complete(request)
+  return complete(request)
 
 
 # Supporting Query Method Documentation:
